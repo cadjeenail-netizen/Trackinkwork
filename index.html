@@ -51,8 +51,11 @@
         <div class="page-header">
           <h1 class="page-title">Clean</h1>
           <div class="total-pill glass-card clean-pill">
-            <span class="total-label">🚗 Nettoyages ce mois</span>
-            <span class="clean-count-display" id="clean-count">0</span>
+            <div>
+              <span class="total-label">🚗 Nettoyages ce mois</span>
+              <div class="clean-sub" id="clean-count">0 nettoyage</div>
+            </div>
+            <span class="clean-count-display" id="clean-total">0 €</span>
           </div>
         </div>
 
@@ -102,12 +105,23 @@
             <div class="glass-card settings-card">
               <div class="settings-row">
                 <div class="settings-row-left">
-                  <span class="settings-icon">💰</span>
-                  <span class="settings-row-title">Tarif journalier</span>
+                  <span class="settings-icon">💼</span>
+                  <span class="settings-row-title">Tarif jour de travail</span>
                 </div>
                 <div class="settings-row-right">
                   <input class="rate-input" type="number" id="daily-rate"
                          value="50" min="1" max="99999" step="1" />
+                  <span class="currency-label">€</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <span class="settings-icon">🚗</span>
+                  <span class="settings-row-title">Tarif nettoyage</span>
+                </div>
+                <div class="settings-row-right">
+                  <input class="rate-input" type="number" id="clean-rate"
+                         value="0" min="0" max="99999" step="1" />
                   <span class="currency-label">€</span>
                 </div>
               </div>

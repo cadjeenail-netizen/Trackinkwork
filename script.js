@@ -180,6 +180,7 @@ const state = {
   work:  {},   // { "2026-04": { "1": 1, "5": 0.5 } }  1=full, 0.5=half
   clean: {},   // { "2026-04": [1,5,10] }
   dailyRate: 50,
+  cleanRate: 0,
   theme: 'violet',
 };
 
@@ -189,7 +190,7 @@ const state = {
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     work: state.work, clean: state.clean,
-    dailyRate: state.dailyRate, theme: state.theme,
+    dailyRate: state.dailyRate, cleanRate: state.cleanRate, theme: state.theme,
   }));
 }
 
@@ -215,6 +216,7 @@ function load() {
     state.work      = p.work      || {};
     state.clean     = p.clean     || {};
     state.dailyRate = p.dailyRate || 50;
+    state.cleanRate = p.cleanRate ?? 0;
     state.theme     = p.theme     || 'violet';
   } catch (_) { /* start fresh */ }
 }
@@ -349,6 +351,8 @@ function renderCleanCalendar() {
   const count = (state.clean[monthKey(y, m)] || []).length;
   document.getElementById('clean-count').textContent =
     `${count} nettoyage${count !== 1 ? 's' : ''}`;
+  document.getElementById('clean-total').textContent =
+    state.cleanRate > 0 ? fmt(count * state.cleanRate) : '—';
 
   const grid = document.getElementById('clean-calendar-grid');
   grid.innerHTML = '';
@@ -446,6 +450,20 @@ function bindSettings() {
     }
   });
 
+  // Clean rate
+  const cleanRateInput = document.getElementById('clean-rate');
+  cleanRateInput.addEventListener('change', () => {
+    const v = parseInt(cleanRateInput.value, 10);
+    if (!isNaN(v) && v >= 0) {
+      state.cleanRate = v;
+      save();
+      renderCleanCalendar();
+      showToast('Tarif nettoyage mis à jour');
+    } else {
+      cleanRateInput.value = state.cleanRate;
+    }
+  });
+
   // Export
   document.getElementById('export-btn').addEventListener('click', () => {
     const json = JSON.stringify(
@@ -478,7 +496,8 @@ function bindSettings() {
 }
 
 function renderSettings() {
-  document.getElementById('daily-rate').value = state.dailyRate;
+  document.getElementById('daily-rate').value  = state.dailyRate;
+  document.getElementById('clean-rate').value  = state.cleanRate;
   renderThemeGrid();
 }
 

@@ -151,6 +151,12 @@ body {
   text-shadow: 0 0 20px var(--success-glow);
   transition: all 0.3s ease;
 }
+.clean-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 2px;
+  font-weight: 500;
+}
 .clean-count-display {
   font-size: 26px;
   font-weight: 700;
@@ -158,6 +164,7 @@ body {
   letter-spacing: -0.5px;
   text-shadow: 0 0 20px var(--clean-glow);
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════
