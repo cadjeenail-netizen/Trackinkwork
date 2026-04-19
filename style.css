@@ -860,9 +860,9 @@ body {
 .modal-btn.confirm { background: var(--danger); color: #fff; }
 
 /* ════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — MOBILE TABLET
    ════════════════════════════════════════ */
-@media (min-width: 440px) {
+@media (min-width: 440px) and (max-width: 767px) {
   .tab-content {
     padding-left:  max(16px, calc((100% - 408px) / 2));
     padding-right: max(16px, calc((100% - 408px) / 2));
@@ -872,6 +872,90 @@ body {
     padding-right: max(14px, calc((100% - 408px) / 2));
   }
 }
+
+/* ════════════════════════════════════════
+   DESKTOP — phone frame centré
+   ════════════════════════════════════════ */
 @media (min-width: 768px) {
-  .page-title { font-size: 40px; }
+
+  /* Corps : centré, scrollable si viewport très petit */
+  body {
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    /* Fond desktop : mesh léger pour mettre en valeur la phone frame */
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.02) 1px, transparent 1px),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px, 60px 60px;
+  }
+
+  /* Phone frame */
+  .app {
+    position: relative;
+    inset: auto;
+    width: 390px;
+    height: min(844px, calc(100dvh - 48px));
+    border-radius: 52px;
+    overflow: hidden;
+    flex-shrink: 0;
+    /* Cadre façon verre / métal */
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.18),    /* bord intérieur lumineux */
+      0 0 0 10px rgba(0,0,0,0.30),          /* liseré sombre */
+      0 0 0 11px rgba(255,255,255,0.06),    /* reflet externe */
+      0 40px 120px rgba(0,0,0,0.55),        /* ombre principale */
+      0 80px 200px rgba(0,0,0,0.35);        /* ombre diffuse */
+  }
+
+  /* Blobs restent en position:fixed → couvrent tout le bureau */
+  .bg-blob { position: fixed; }
+
+  /* Contenu : padding fixe, centré dans la frame */
+  .tab-content {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 20px;
+    padding-bottom: 96px;
+  }
+
+  /* Tab bar : pas de safe-area sur desktop */
+  .tab-bar {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 10px;
+  }
+
+  /* Toast positionné dans la frame : toujours centré (left:50% → centre viewport = centre frame) */
+  .toast { bottom: 104px; }
+
+  /* Modal overlay couvre toute la viewport (backdrop intentionnel) */
+
+  /* Titre légèrement réduit pour la frame 390px */
+  .page-title { font-size: 33px; }
+
+  /* Hover cursor sur les jours */
+  .day-cell:not(.empty):not(.other-month):hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+    transform: scale(1.05);
+  }
+  .day-cell.worked:hover,
+  .day-cell.worked-half:hover {
+    transform: scale(1.05);
+  }
+  .day-cell.cleaned:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Très grand écran : frame légèrement plus grande */
+@media (min-width: 1100px) {
+  .app {
+    width: 420px;
+    height: min(900px, calc(100dvh - 48px));
+  }
 }
