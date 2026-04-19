@@ -9,12 +9,10 @@
 <body>
   <div class="app">
 
-    <!-- Animated background blobs -->
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
 
-    <!-- ────────────────── MAIN CONTENT ────────────────── -->
     <main class="main-content">
 
       <!-- ── TAB 1 : Jour de travail ── -->
@@ -33,16 +31,17 @@
             <span class="month-title" id="month-title"></span>
             <button class="nav-btn" id="next-month" aria-label="Mois suivant">&#8250;</button>
           </div>
-
           <div class="calendar-weekdays">
             <span>Lun</span><span>Mar</span><span>Mer</span>
             <span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
           </div>
-
           <div class="calendar-grid" id="calendar-grid"></div>
-
           <div class="calendar-legend">
-            <span class="legend-dot worked"></span><span class="legend-text">Jour travaillé</span>
+            <span class="legend-dot worked"></span>
+            <span class="legend-text">Journée (1×)</span>
+            <span class="legend-sep"></span>
+            <span class="legend-half">½</span>
+            <span class="legend-text">Demi-journée (2×)</span>
           </div>
         </div>
       </section>
@@ -51,12 +50,28 @@
       <section id="tab-clean" class="tab-content">
         <div class="page-header">
           <h1 class="page-title">Clean</h1>
-          <div class="year-total-pill glass-card">
-            <span class="total-label">Total annuel</span>
-            <span class="total-amount" id="year-total">0 €</span>
+          <div class="total-pill glass-card clean-pill">
+            <span class="total-label">🚗 Nettoyages ce mois</span>
+            <span class="clean-count-display" id="clean-count">0</span>
           </div>
         </div>
-        <div class="clean-list" id="clean-list"></div>
+
+        <div class="glass-card calendar-card">
+          <div class="calendar-nav">
+            <button class="nav-btn" id="clean-prev-month" aria-label="Mois précédent">&#8249;</button>
+            <span class="month-title" id="clean-month-title"></span>
+            <button class="nav-btn" id="clean-next-month" aria-label="Mois suivant">&#8250;</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>Lun</span><span>Mar</span><span>Mer</span>
+            <span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+          </div>
+          <div class="calendar-grid" id="clean-calendar-grid"></div>
+          <div class="calendar-legend">
+            <span class="legend-car">🚗</span>
+            <span class="legend-text">Voiture nettoyée</span>
+          </div>
+        </div>
       </section>
 
       <!-- ── TAB 3 : Paramètres ── -->
@@ -67,6 +82,21 @@
 
         <div class="settings-stack">
 
+          <!-- Thèmes -->
+          <div class="settings-section">
+            <div class="settings-section-label">Apparence</div>
+            <div class="glass-card settings-card">
+              <div class="settings-row theme-label-row">
+                <div class="settings-row-left">
+                  <span class="settings-icon">🎨</span>
+                  <span class="settings-row-title" id="theme-name-display">Violet Nuit</span>
+                </div>
+              </div>
+              <div class="theme-grid" id="theme-grid"></div>
+            </div>
+          </div>
+
+          <!-- Tarification -->
           <div class="settings-section">
             <div class="settings-section-label">Tarification</div>
             <div class="glass-card settings-card">
@@ -84,6 +114,7 @@
             </div>
           </div>
 
+          <!-- Données -->
           <div class="settings-section">
             <div class="settings-section-label">Données</div>
             <div class="glass-card settings-card">
@@ -97,6 +128,7 @@
             </div>
           </div>
 
+          <!-- Danger -->
           <div class="settings-section">
             <div class="settings-section-label">Zone dangereuse</div>
             <div class="glass-card settings-card danger-card">
@@ -110,11 +142,12 @@
             </div>
           </div>
 
+          <!-- About -->
           <div class="settings-section">
             <div class="glass-card settings-card about-card">
               <div class="about-logo">🖋️</div>
               <div class="about-name">TrackInkWork</div>
-              <div class="about-version">v1.0.0 · Statique · GitHub Pages</div>
+              <div class="about-version">v2.0.0 · Statique · GitHub Pages</div>
             </div>
           </div>
 
@@ -123,13 +156,13 @@
 
     </main>
 
-    <!-- ────────────────── TAB BAR ────────────────── -->
+    <!-- ── TAB BAR ── -->
     <nav class="tab-bar">
       <div class="tab-bar-inner glass-card">
 
         <button class="tab-btn active" data-tab="workday">
           <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
             <line x1="16" y1="2" x2="16" y2="6"/>
             <line x1="8" y1="2" x2="8" y2="6"/>
             <line x1="3" y1="10" x2="21" y2="10"/>
@@ -139,7 +172,8 @@
 
         <button class="tab-btn" data-tab="clean">
           <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            <path d="M19 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h8l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/>
+            <circle cx="12" cy="13" r="2.5"/>
           </svg>
           <span class="tab-label">Clean</span>
         </button>
@@ -155,15 +189,15 @@
       </div>
     </nav>
 
-    <!-- ────────────────── TOAST ────────────────── -->
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
-    <!-- ────────────────── CONFIRM MODAL ────────────────── -->
+    <!-- Modal -->
     <div class="modal-overlay" id="modal-overlay">
       <div class="modal glass-card">
         <div class="modal-icon">⚠️</div>
         <h2 class="modal-title">Réinitialiser ?</h2>
-        <p class="modal-body">Toutes vos données seront définitivement supprimées. Cette action est irréversible.</p>
+        <p class="modal-body">Toutes vos données (travail + nettoyages) seront définitivement supprimées.</p>
         <div class="modal-actions">
           <button class="modal-btn cancel" id="modal-cancel">Annuler</button>
           <button class="modal-btn confirm" id="modal-confirm">Supprimer</button>
