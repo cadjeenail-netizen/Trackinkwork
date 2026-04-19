@@ -295,6 +295,7 @@ function renderWorkCalendar() {
   for (let d = 1; d <= rem; d++) {
     grid.appendChild(makeWorkCell(d, y, m, true));
   }
+  animateGrid('calendar-grid');
 }
 
 function makeWorkCell(d, y, m, isOther, isWeekend, isToday, val) {
@@ -376,6 +377,7 @@ function renderCleanCalendar() {
   for (let d = 1; d <= rem; d++) {
     grid.appendChild(makeCleanCell(d, y, m, true));
   }
+  animateGrid('clean-calendar-grid');
 }
 
 function makeCleanCell(d, y, m, isOther, isWeekend, isToday, cleaned) {
@@ -522,7 +524,7 @@ function showToast(msg) {
 // ══════════════════════════════════════
 // TABS + SWIPE
 // ══════════════════════════════════════
-const TAB_ORDER = ['workday', 'clean', 'settings'];
+const TAB_ORDER = ['workday', 'clean', 'resume', 'settings'];
 
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
@@ -530,6 +532,7 @@ function switchTab(id) {
   document.getElementById(`tab-${id}`)?.classList.add('active');
   document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');
   if (id === 'clean')    renderCleanCalendar();
+  if (id === 'resume')   renderResume();
   if (id === 'settings') renderSettings();
 }
 
@@ -575,6 +578,115 @@ function bindCalendarNav() {
     if (state.cleanMonth > 11) { state.cleanMonth = 0;  state.cleanYear++; }
     renderCleanCalendar();
   });
+}
+
+// ══════════════════════════════════════
+// VISUAL — grid entrance animation
+// ══════════════════════════════════════
+function animateGrid(id) {
+  const g = document.getElementById(id);
+  if (!g) return;
+  g.classList.remove('animating');
+  void g.offsetWidth;
+  g.classList.add('animating');
+}
+
+// ══════════════════════════════════════
+// RÉSUMÉ TAB
+// ══════════════════════════════════════
+function renderResume() {
+  const now  = new Date();
+  const year = now.getFullYear();
+
+  document.getElementById('resume-year').textContent = year;
+
+  // Collect all month keys that have any data
+  const allKeys = new Set([
+    ...Object.keys(state.work),
+    ...Object.keys(state.clean),
+  ]);
+  // Always show all 12 months of current year
+  for (let m = 0; m < 12; m++) allKeys.add(monthKey(year, m));
+
+  const sorted = [...allKeys]
+    .filter(k => k.startsWith(String(year)))
+    .sort((a, b) => b.localeCompare(a));
+
+  // Annual totals
+  let totalWorkDays = 0, totalClean = 0, totalWorkEarn = 0, totalCleanEarn = 0;
+  sorted.forEach(k => {
+    const [yr, mo] = k.split('-').map(Number);
+    const wDays = Object.values(state.work[k] || {}).reduce((s, v) => s + v, 0);
+    const cDays = (state.clean[k] || []).length;
+    totalWorkDays += wDays;
+    totalClean    += cDays;
+    totalWorkEarn += wDays * state.dailyRate;
+    totalCleanEarn += cDays * state.cleanRate;
+  });
+
+  const grand = totalWorkEarn + totalCleanEarn;
+  document.getElementById('resume-grand-total').textContent = fmt(grand);
+  document.getElementById('resume-work-days').textContent   = totalWorkDays % 1 === 0 ? totalWorkDays : totalWorkDays.toFixed(1);
+  document.getElementById('resume-clean-count').textContent = totalClean;
+  document.getElementById('resume-work-earn').textContent   = fmt(totalWorkEarn);
+  document.getElementById('resume-clean-earn').textContent  = fmt(totalCleanEarn);
+
+  // Monthly list
+  const list = document.getElementById('resume-months');
+  list.innerHTML = '';
+
+  const maxTotal = Math.max(1, ...sorted.map(k => {
+    const [,mo] = k.split('-').map(Number);
+    const wE = Object.values(state.work[k] || {}).reduce((s,v) => s+v, 0) * state.dailyRate;
+    const cE = (state.clean[k] || []).length * state.cleanRate;
+    return wE + cE;
+  }));
+
+  const monthIcons = ['🎄','❄️','🌸','🌿','☀️','🏖️','🌻','🍂','🎃','🍁','🌧️','⛄'];
+
+  sorted.forEach(k => {
+    const [yr, mo] = k.split('-').map(Number);
+    const label = new Date(yr, mo - 1, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const wDays = Object.values(state.work[k] || {}).reduce((s, v) => s + v, 0);
+    const cDays = (state.clean[k] || []).length;
+    const wEarn = wDays * state.dailyRate;
+    const cEarn = cDays * state.cleanRate;
+    const rowTotal = wEarn + cEarn;
+    const pct = (rowTotal / maxTotal) * 100;
+
+    const wLabel = wDays > 0 ? `💼 ${wDays % 1 === 0 ? wDays : wDays.toFixed(1)}j` : '';
+    const cLabel = cDays > 0 ? `🚗 ${cDays}` : '';
+    const metaParts = [wLabel, cLabel].filter(Boolean).join(' · ');
+
+    const card = document.createElement('div');
+    card.className = 'glass-card resume-month-card';
+    card.innerHTML = `
+      <div class="resume-month-icon">${monthIcons[mo - 1] || '📅'}</div>
+      <div class="resume-month-body">
+        <div class="resume-month-name">${label}</div>
+        <div class="resume-month-meta">${metaParts || '—'}</div>
+        <div class="resume-bar-track">
+          <div class="resume-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="resume-month-total${rowTotal === 0 ? ' zero' : ''}">${rowTotal > 0 ? fmt(rowTotal) : '—'}</div>`;
+
+    card.addEventListener('click', () => {
+      state.workYear  = yr;
+      state.workMonth = mo - 1;
+      switchTab('workday');
+      renderWorkCalendar();
+    });
+
+    list.appendChild(card);
+  });
+
+  if (list.children.length === 0) {
+    list.innerHTML = `<div class="resume-empty">
+      <div class="resume-empty-icon">📭</div>
+      <div class="resume-empty-text">Aucune donnée pour cette année</div>
+    </div>`;
+  }
 }
 
 // ══════════════════════════════════════
