@@ -113,6 +113,28 @@
           </div>
         </div>
 
+        <!-- Objectif mensuel — style Apple Watch -->
+        <div class="glass-card goal-card" id="goal-card">
+          <div class="goal-ring-wrap">
+            <svg class="goal-ring" viewBox="0 0 120 120" id="goal-svg">
+              <circle class="goal-track" cx="60" cy="60" r="48"/>
+              <circle class="goal-progress" cx="60" cy="60" r="48" id="goal-progress-circle"/>
+              <text class="goal-pct" x="60" y="55" id="goal-pct-text">0%</text>
+              <text class="goal-amount" x="60" y="72" id="goal-amount-text">0 €</text>
+            </svg>
+          </div>
+          <div class="goal-info">
+            <div class="goal-title">Objectif mensuel</div>
+            <div class="goal-sub" id="goal-sub-text">—</div>
+            <div class="goal-bar-wrap">
+              <div class="goal-bar-bg">
+                <div class="goal-bar-fill" id="goal-bar-fill"></div>
+              </div>
+            </div>
+            <button class="goal-edit-btn" id="goal-edit-btn">Modifier l'objectif</button>
+          </div>
+        </div>
+
         <!-- Stats avancées -->
         <div class="glass-card adv-stats-card">
           <div class="adv-stats-row">
@@ -184,6 +206,17 @@
                 </div>
                 <div class="settings-row-right">
                   <input class="rate-input" type="number" id="clean-rate" value="0" min="0" max="99999" />
+                  <span class="currency-label">€</span>
+                </div>
+              </div>
+              <div class="settings-separator"></div>
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-icon-wrap">🎯</div>
+                  <span class="settings-row-title">Objectif mensuel</span>
+                </div>
+                <div class="settings-row-right">
+                  <input class="rate-input" type="number" id="goal-input" value="0" min="0" max="999999" />
                   <span class="currency-label">€</span>
                 </div>
               </div>

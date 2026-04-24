@@ -208,6 +208,7 @@ const state = {
   clean: {},
   dailyRate: 50,
   cleanRate: 0,
+  monthlyGoal: 0,
   theme: 'violet',
   _justToggled: null,
 };
@@ -218,7 +219,8 @@ const state = {
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     work: state.work, clean: state.clean,
-    dailyRate: state.dailyRate, cleanRate: state.cleanRate, theme: state.theme,
+    dailyRate: state.dailyRate, cleanRate: state.cleanRate,
+    monthlyGoal: state.monthlyGoal, theme: state.theme,
   }));
 }
 
@@ -238,11 +240,12 @@ function load() {
       state.theme     = 'violet';
       return;
     }
-    state.work      = p.work      || {};
-    state.clean     = p.clean     || {};
-    state.dailyRate = p.dailyRate || 50;
-    state.cleanRate = p.cleanRate ?? 0;
-    state.theme     = p.theme     || 'violet';
+    state.work        = p.work        || {};
+    state.clean       = p.clean       || {};
+    state.dailyRate   = p.dailyRate   || 50;
+    state.cleanRate   = p.cleanRate   ?? 0;
+    state.monthlyGoal = p.monthlyGoal ?? 0;
+    state.theme       = p.theme       || 'violet';
   } catch (_) { /* start fresh */ }
 }
 
@@ -473,6 +476,47 @@ function renderThemeGrid() {
     });
     grid.appendChild(btn);
   });
+}
+
+// ══════════════════════════════════════
+// OBJECTIF MENSUEL — Apple Watch Ring
+// ══════════════════════════════════════
+function renderGoal() {
+  const card   = document.getElementById('goal-card');
+  const circle = document.getElementById('goal-progress-circle');
+  const pctTxt = document.getElementById('goal-pct-text');
+  const amtTxt = document.getElementById('goal-amount-text');
+  const subTxt = document.getElementById('goal-sub-text');
+  const barFill = document.getElementById('goal-bar-fill');
+  if (!card || !circle) return;
+
+  const now = new Date();
+  const key = monthKey(now.getFullYear(), now.getMonth());
+  const wDays = Object.values(state.work[key] || {}).reduce((s, v) => s + v, 0);
+  const cDays = (state.clean[key] || []).length;
+  const current = wDays * state.dailyRate + cDays * state.cleanRate;
+  const goal    = state.monthlyGoal;
+
+  const CIRC = 2 * Math.PI * 48; // 301.59
+  const pct  = goal > 0 ? Math.min(current / goal, 1) : 0;
+  const offset = CIRC * (1 - pct);
+
+  circle.style.strokeDashoffset = offset;
+  pctTxt.textContent  = goal > 0 ? Math.round(pct * 100) + '%' : '—';
+  amtTxt.textContent  = fmt(current);
+
+  if (goal > 0) {
+    const remain = goal - current;
+    subTxt.textContent = remain > 0
+      ? `Il manque ${fmt(remain)} pour atteindre ${fmt(goal)}`
+      : `🎉 Objectif atteint ! (+${fmt(-remain)})`;
+    barFill.style.width = (pct * 100) + '%';
+    card.classList.toggle('reached', pct >= 1);
+  } else {
+    subTxt.textContent = 'Définissez un objectif dans les réglages';
+    barFill.style.width = '0%';
+    card.classList.remove('reached');
+  }
 }
 
 // ══════════════════════════════════════
@@ -727,6 +771,30 @@ function bindSettings() {
 
   document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
 
+  // Objectif mensuel
+  const goalInput = document.getElementById('goal-input');
+  if (goalInput) {
+    goalInput.addEventListener('change', () => {
+      const v = parseInt(goalInput.value, 10);
+      if (!isNaN(v) && v >= 0) {
+        state.monthlyGoal = v;
+        save();
+        renderGoal();
+        showToast(`🎯 Objectif : ${fmt(v)}`);
+      } else {
+        goalInput.value = state.monthlyGoal;
+      }
+    });
+  }
+  // Bouton modifier objectif dans résumé
+  document.getElementById('goal-edit-btn')?.addEventListener('click', () => {
+    switchTab('settings');
+    setTimeout(() => {
+      const inp = document.getElementById('goal-input');
+      if (inp) { inp.focus(); inp.select(); }
+    }, 350);
+  });
+
   document.getElementById('reset-btn').addEventListener('click', showModal);
   document.getElementById('modal-cancel').addEventListener('click', hideModal);
   document.getElementById('modal-confirm').addEventListener('click', () => {
@@ -746,6 +814,8 @@ function bindSettings() {
 function renderSettings() {
   document.getElementById('daily-rate').value  = state.dailyRate;
   document.getElementById('clean-rate').value  = state.cleanRate;
+  const gi = document.getElementById('goal-input');
+  if (gi) gi.value = state.monthlyGoal;
   renderThemeGrid();
 }
 
@@ -790,14 +860,11 @@ function updateTabIndicator(tabId) {
   const indicator = document.getElementById('tab-indicator');
   const btn = document.querySelector(`[data-tab="${tabId}"]`);
   if (!indicator || !btn) return;
-  const bar = btn.parentElement;
-  const barRect = bar.getBoundingClientRect();
-  const btnRect = btn.getBoundingClientRect();
-  const padding = 4;
-  indicator.style.left   = (btnRect.left - barRect.left + padding) + 'px';
-  indicator.style.width  = (btnRect.width - padding * 2) + 'px';
-  indicator.style.height = (btn.offsetHeight - padding * 2) + 'px';
-  indicator.style.top    = padding + 'px';
+  const p = 3;
+  indicator.style.left   = (btn.offsetLeft + p) + 'px';
+  indicator.style.top    = p + 'px';
+  indicator.style.width  = (btn.offsetWidth - p * 2) + 'px';
+  indicator.style.height = (btn.offsetHeight - p * 2) + 'px';
 }
 
 function switchTab(id) {
@@ -902,6 +969,7 @@ function renderResume() {
   document.getElementById('resume-work-earn').textContent   = fmt(totalWorkEarn);
   document.getElementById('resume-clean-earn').textContent  = fmt(totalCleanEarn);
 
+  renderGoal();
   renderAdvancedStats();
   renderChart();
 
