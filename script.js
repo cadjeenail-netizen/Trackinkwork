@@ -786,11 +786,26 @@ function checkOnboarding() {
 // ══════════════════════════════════════
 const TAB_ORDER = ['workday', 'clean', 'resume', 'settings'];
 
+function updateTabIndicator(tabId) {
+  const indicator = document.getElementById('tab-indicator');
+  const btn = document.querySelector(`[data-tab="${tabId}"]`);
+  if (!indicator || !btn) return;
+  const bar = btn.parentElement;
+  const barRect = bar.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  const padding = 4;
+  indicator.style.left   = (btnRect.left - barRect.left + padding) + 'px';
+  indicator.style.width  = (btnRect.width - padding * 2) + 'px';
+  indicator.style.height = (btn.offsetHeight - padding * 2) + 'px';
+  indicator.style.top    = padding + 'px';
+}
+
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${id}`)?.classList.add('active');
   document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');
+  updateTabIndicator(id);
   if (id === 'clean')    renderCleanCalendar();
   if (id === 'resume')   renderResume();
   if (id === 'settings') renderSettings();
@@ -958,4 +973,6 @@ document.addEventListener('DOMContentLoaded', () => {
   bindSettings();
   renderWorkCalendar();
   checkOnboarding();
+  // Positionne l'indicateur après layout
+  requestAnimationFrame(() => updateTabIndicator('workday'));
 });

@@ -107,28 +107,26 @@ body {
    ════════════════════════════════════════ */
 .glass-card {
   position: relative;
-  /* Multi-layer background: shimmer on top of frosted base */
   background:
     linear-gradient(
       148deg,
-      rgba(255,255,255,0.13) 0%,
-      rgba(255,255,255,0.05) 30%,
-      transparent 60%
+      rgba(255,255,255,0.16) 0%,
+      rgba(255,255,255,0.06) 28%,
+      transparent 58%
     ),
     var(--glass-bg);
-  backdrop-filter: blur(48px) saturate(200%) brightness(1.04);
-  -webkit-backdrop-filter: blur(48px) saturate(200%) brightness(1.04);
-  /* Specular top edge — the "liquid" highlight */
+  backdrop-filter: blur(56px) saturate(210%) brightness(1.05);
+  -webkit-backdrop-filter: blur(56px) saturate(210%) brightness(1.05);
   border: 1px solid var(--glass-border);
-  border-top-color: rgba(255,255,255,0.24);
+  border-top-color: rgba(255,255,255,0.30);
+  border-left-color: rgba(255,255,255,0.16);
   border-radius: var(--r-lg);
-  /* Multi-layer shadow for depth */
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.16) inset,
-    0 -0.5px 0 rgba(0,0,0,0.08) inset,
+    0 1.5px 0 rgba(255,255,255,0.20) inset,
+    0 -0.5px 0 rgba(0,0,0,0.07) inset,
     0 2px 8px  rgba(0,0,0,0.10),
-    0 8px 28px rgba(0,0,0,0.14),
-    0 20px 56px rgba(0,0,0,0.10);
+    0 8px 32px rgba(0,0,0,0.16),
+    0 24px 64px rgba(0,0,0,0.10);
   overflow: hidden;
   transition: box-shadow 0.3s var(--ease-ios);
 }
@@ -193,20 +191,66 @@ body {
   margin-bottom: 14px;
 }
 
-/* Hero card (replaces total-pill) */
+/* Hero card */
 .hero-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 22px;
+  padding: 20px 22px;
   gap: 12px;
+  /* Liquid Glass renforcé */
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,0.18) 0%,
+      rgba(255,255,255,0.06) 35%,
+      transparent 65%),
+    var(--glass-bg);
+  backdrop-filter: blur(64px) saturate(220%) brightness(1.06);
+  -webkit-backdrop-filter: blur(64px) saturate(220%) brightness(1.06);
+  /* Bord specular top = effet liquid */
+  border-top-color: rgba(255,255,255,0.38);
+  /* Reflet interne */
+  box-shadow:
+    0 1.5px 0 rgba(255,255,255,0.22) inset,
+    0 -0.5px 0 rgba(0,0,0,0.06) inset,
+    0 4px 24px rgba(0,0,0,0.18),
+    0 12px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
 }
+/* Fine ligne dorée décorative */
+.hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 18px; right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,168,76,0.35) 30%,
+    rgba(201,168,76,0.55) 50%,
+    rgba(201,168,76,0.35) 70%,
+    transparent 100%);
+}
+/* Motif micro-lignes billet */
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -52deg,
+    transparent 0px, transparent 3px,
+    rgba(201,168,76,0.025) 3px, rgba(201,168,76,0.025) 4px
+  );
+  pointer-events: none;
+}
+
 .clean-hero { align-items: flex-start; }
 .hero-label {
-  font-size: 13px;
-  color: var(--text-2);
-  font-weight: 500;
-  letter-spacing: 0.1px;
+  font-size: 11px;
+  color: rgba(201,168,76,0.75);
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  font-family: Georgia, 'Times New Roman', serif;
 }
 .hero-sub {
   font-size: 14px;
@@ -214,13 +258,28 @@ body {
   font-weight: 500;
   margin-top: 4px;
 }
+/* Montant principal — style old money */
 .hero-amount {
-  font-size: 28px;
+  font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: -0.8px;
+  letter-spacing: 0.5px;
   line-height: 1;
-  transition: all 0.35s var(--spring);
   flex-shrink: 0;
+  transition: all 0.35s var(--spring);
+  /* Dégradé or / billet */
+  background: linear-gradient(
+    145deg,
+    #f0dc82 0%,
+    #c9a84c 30%,
+    #f5e898 55%,
+    #b8960c 80%,
+    #e8d07a 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(201,168,76,0.5));
 }
 
 /* Semantic colors */
@@ -733,25 +792,34 @@ body {
   transition-duration: 0.08s;
 }
 
-/* Active indicator pill — spring pop */
-.tab-btn::before {
-  content: '';
+/* Sliding indicator pill */
+.tab-indicator {
   position: absolute;
-  inset: 0;
   border-radius: var(--r-md);
-  background: var(--accent-light);
-  border: 1px solid rgba(255,255,255,0.1);
-  transform: scale(0.7);
-  opacity: 0;
-  transition: transform 0.45s var(--spring), opacity 0.25s ease;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%),
+    var(--accent-light);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-top-color: rgba(255,255,255,0.32);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.18) inset,
+    0 4px 16px var(--accent-glow),
+    0 2px 8px rgba(0,0,0,0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none;
+  z-index: 0;
+  transition:
+    left 0.4s var(--spring),
+    width 0.4s var(--spring),
+    top 0.4s var(--spring),
+    height 0.4s var(--spring);
+  will-change: left, width;
 }
 .tab-btn.active {
   color: var(--accent);
 }
-.tab-btn.active::before {
-  transform: scale(1);
-  opacity: 1;
-}
+.tab-btn::before { display: none; }
 
 .tab-icon {
   width: 22px; height: 22px;
