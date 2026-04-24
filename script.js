@@ -786,13 +786,12 @@ function bindSettings() {
       }
     });
   }
-  // Bouton modifier objectif dans résumé
-  document.getElementById('goal-edit-btn')?.addEventListener('click', () => {
-    switchTab('settings');
-    setTimeout(() => {
-      const inp = document.getElementById('goal-input');
-      if (inp) { inp.focus(); inp.select(); }
-    }, 350);
+  // Bouton modifier objectif → modal directement
+  document.getElementById('goal-edit-btn')?.addEventListener('click', showGoalModal);
+  document.getElementById('goal-modal-cancel')?.addEventListener('click', hideGoalModal);
+  document.getElementById('goal-modal-confirm')?.addEventListener('click', confirmGoalModal);
+  document.getElementById('goal-modal-overlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('goal-modal-overlay')) hideGoalModal();
   });
 
   document.getElementById('reset-btn').addEventListener('click', showModal);
@@ -820,10 +819,39 @@ function renderSettings() {
 }
 
 // ══════════════════════════════════════
-// MODAL
+// MODAL RESET
 // ══════════════════════════════════════
 function showModal() { document.getElementById('modal-overlay').classList.add('show'); }
 function hideModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+// ══════════════════════════════════════
+// MODAL OBJECTIF
+// ══════════════════════════════════════
+function showGoalModal() {
+  const overlay = document.getElementById('goal-modal-overlay');
+  const inp     = document.getElementById('goal-modal-input');
+  if (!overlay) return;
+  if (inp) { inp.value = state.monthlyGoal || ''; }
+  overlay.classList.add('show');
+  setTimeout(() => { if (inp) { inp.focus(); inp.select(); } }, 300);
+}
+function hideGoalModal() {
+  document.getElementById('goal-modal-overlay')?.classList.remove('show');
+}
+function confirmGoalModal() {
+  const inp = document.getElementById('goal-modal-input');
+  const v   = parseInt(inp?.value, 10);
+  if (!isNaN(v) && v >= 0) {
+    state.monthlyGoal = v;
+    save();
+    renderGoal();
+    const gi = document.getElementById('goal-input');
+    if (gi) gi.value = v;
+    showToast(`🎯 Objectif : ${fmt(v)}`);
+    vibrate([15, 8, 15]);
+  }
+  hideGoalModal();
+}
 
 // ══════════════════════════════════════
 // TOAST
@@ -856,6 +884,13 @@ function checkOnboarding() {
 // ══════════════════════════════════════
 const TAB_ORDER = ['workday', 'clean', 'resume', 'settings'];
 
+const TAB_COLORS = {
+  workday:  { bg: 'rgba(52,211,153,0.18)',  glow: 'rgba(52,211,153,0.45)'  },
+  clean:    { bg: 'rgba(56,189,248,0.18)',  glow: 'rgba(56,189,248,0.45)'  },
+  resume:   { bg: 'rgba(129,140,248,0.18)', glow: 'rgba(129,140,248,0.45)' },
+  settings: { bg: 'rgba(251,146,60,0.18)',  glow: 'rgba(251,146,60,0.45)'  },
+};
+
 function updateTabIndicator(tabId) {
   const indicator = document.getElementById('tab-indicator');
   const btn = document.querySelector(`[data-tab="${tabId}"]`);
@@ -865,6 +900,12 @@ function updateTabIndicator(tabId) {
   indicator.style.top    = p + 'px';
   indicator.style.width  = (btn.offsetWidth - p * 2) + 'px';
   indicator.style.height = (btn.offsetHeight - p * 2) + 'px';
+  // Couleur unique par onglet
+  const c = TAB_COLORS[tabId] || TAB_COLORS.workday;
+  indicator.style.setProperty('--ind-color', c.bg);
+  indicator.style.setProperty('--ind-glow',  c.glow);
+  indicator.style.background = `linear-gradient(135deg,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0.07) 100%),${c.bg}`;
+  indicator.style.boxShadow  = `0 1px 0 rgba(255,255,255,0.22) inset,0 4px 20px ${c.glow},0 2px 8px rgba(0,0,0,0.2)`;
 }
 
 function switchTab(id) {

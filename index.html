@@ -18,6 +18,8 @@
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
+    <div class="bg-blob blob-4"></div>
+    <div class="bg-blob blob-5"></div>
 
     <main class="main-content">
 
@@ -312,6 +314,23 @@
 
       </div>
     </nav>
+
+    <!-- Modal objectif -->
+    <div class="goal-modal-overlay" id="goal-modal-overlay">
+      <div class="goal-modal-box glass-card">
+        <div class="goal-modal-icon">🎯</div>
+        <h2 class="goal-modal-title">Objectif mensuel</h2>
+        <p class="goal-modal-sub">Combien veux-tu gagner ce mois-ci ?</p>
+        <div class="goal-modal-input-row">
+          <input class="goal-modal-input" type="number" id="goal-modal-input" min="0" max="999999" placeholder="400" />
+          <span class="goal-modal-currency">€</span>
+        </div>
+        <div class="goal-modal-actions">
+          <button class="goal-modal-btn cancel" id="goal-modal-cancel">Annuler</button>
+          <button class="goal-modal-btn confirm" id="goal-modal-confirm">Valider</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Onboarding -->
     <div class="onboarding-overlay" id="onboarding-overlay">
