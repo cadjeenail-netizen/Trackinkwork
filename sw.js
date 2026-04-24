@@ -1,5 +1,5 @@
-/* TrackInkWork Service Worker v2.2 */
-const CACHE = 'trackinkwork-v2.2';
+/* TrackInkWork Service Worker v2.5 */
+const CACHE = 'trackinkwork-v2.5';
 const ASSETS = [
   '/Trackinkwork/',
   '/Trackinkwork/index.html',
