@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   TRACKINKWORK · App Logic v2
+   TRACKINKWORK · App Logic v2.2
    ═══════════════════════════════════════ */
 
 const STORAGE_KEY = 'trackinkwork_v2';
@@ -163,6 +163,36 @@ const THEMES = [
       '--nav-btn-bg':'rgba(255,255,255,0.12)',
     }
   },
+  // ── NOUVEAUX THÈMES ──
+  {
+    id: 'clair', name: 'Clair',
+    colors: ['#a5b4fc','#93c5fd'],
+    light: true,
+    vars: {
+      '--bg-base':'#f8fafc','--blob-1-color':'#ddd6fe','--blob-2-color':'#bfdbfe','--blob-3-color':'#e0e7ff','--blob-opacity':'0.75',
+      '--accent':'#7c3aed','--accent-light':'rgba(124,58,237,0.12)','--accent-glow':'rgba(124,58,237,0.3)',
+      '--success':'#059669','--success-bg':'rgba(5,150,105,0.1)','--success-border':'rgba(5,150,105,0.25)','--success-glow':'rgba(5,150,105,0.15)',
+      '--clean-accent':'#2563eb','--clean-bg':'rgba(37,99,235,0.1)','--clean-border':'rgba(37,99,235,0.25)','--clean-glow':'rgba(37,99,235,0.15)',
+      '--glass-bg':'rgba(255,255,255,0.65)','--glass-bg-2':'rgba(255,255,255,0.85)','--glass-border':'rgba(0,0,0,0.07)',
+      '--glass-shadow':'0 8px 32px rgba(0,0,0,0.07),0 1px 0 rgba(255,255,255,0.95) inset',
+      '--text-1':'#0f172a','--text-2':'rgba(15,23,42,0.65)','--text-3':'rgba(15,23,42,0.4)',
+      '--nav-btn-bg':'rgba(0,0,0,0.05)',
+    }
+  },
+  {
+    id: 'anthracite', name: 'Sombre Neutre',
+    colors: ['#374151','#4b5563'],
+    vars: {
+      '--bg-base':'#111827','--blob-1-color':'#374151','--blob-2-color':'#4b5563','--blob-3-color':'#1f2937','--blob-opacity':'0.9',
+      '--accent':'#9ca3af','--accent-light':'rgba(156,163,175,0.15)','--accent-glow':'rgba(156,163,175,0.3)',
+      '--success':'#6ee7b7','--success-bg':'rgba(110,231,183,0.12)','--success-border':'rgba(110,231,183,0.28)','--success-glow':'rgba(110,231,183,0.15)',
+      '--clean-accent':'#93c5fd','--clean-bg':'rgba(147,197,253,0.12)','--clean-border':'rgba(147,197,253,0.28)','--clean-glow':'rgba(147,197,253,0.15)',
+      '--glass-bg':'rgba(255,255,255,0.05)','--glass-bg-2':'rgba(255,255,255,0.08)','--glass-border':'rgba(255,255,255,0.1)',
+      '--glass-shadow':'0 8px 32px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.05) inset',
+      '--text-1':'#f9fafb','--text-2':'rgba(249,250,251,0.6)','--text-3':'rgba(249,250,251,0.35)',
+      '--nav-btn-bg':'rgba(255,255,255,0.08)',
+    }
+  },
 ];
 
 // ══════════════════════════════════════
@@ -170,18 +200,16 @@ const THEMES = [
 // ══════════════════════════════════════
 const today = new Date();
 const state = {
-  // Work tab navigation
   workYear:  today.getFullYear(),
   workMonth: today.getMonth(),
-  // Clean tab navigation
   cleanYear:  today.getFullYear(),
   cleanMonth: today.getMonth(),
-  // Data
-  work:  {},   // { "2026-04": { "1": 1, "5": 0.5 } }  1=full, 0.5=half
-  clean: {},   // { "2026-04": [1,5,10] }
+  work:  {},
+  clean: {},
   dailyRate: 50,
   cleanRate: 0,
   theme: 'violet',
+  _justToggled: null,
 };
 
 // ══════════════════════════════════════
@@ -199,8 +227,6 @@ function load() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const p = JSON.parse(raw);
-
-    // Migration from v1 format
     if (p.data && !p.work) {
       state.work = {};
       Object.keys(p.data).forEach(k => {
@@ -212,7 +238,6 @@ function load() {
       state.theme     = 'violet';
       return;
     }
-
     state.work      = p.work      || {};
     state.clean     = p.clean     || {};
     state.dailyRate = p.dailyRate || 50;
@@ -234,9 +259,12 @@ function fmt(amount) {
   }).format(amount);
 }
 
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
 // ══════════════════════════════════════
 // WORK CALENDAR
-// Work day cycle: 0 → 1 (full) → 0.5 (half) → 0 (none)
 // ══════════════════════════════════════
 function getWorkDay(y, m, d) {
   return (state.work[monthKey(y, m)] || {})[String(d)] || 0;
@@ -248,12 +276,17 @@ function cycleWorkDay(y, m, d) {
   const cur = state.work[key][String(d)] || 0;
   if (cur === 0) {
     state.work[key][String(d)] = 1;
+    state._justToggled = { y, m, d, type: 'work' };
+    vibrate([15, 8, 15]);
     showToast(`✅ +${fmt(state.dailyRate)} journée complète`);
   } else if (cur === 1) {
     state.work[key][String(d)] = 0.5;
+    state._justToggled = { y, m, d, type: 'work' };
+    vibrate([10]);
     showToast(`½ +${fmt(state.dailyRate * 0.5)} demi-journée`);
   } else {
     delete state.work[key][String(d)];
+    state._justToggled = null;
     showToast('Jour retiré');
   }
   save();
@@ -287,8 +320,7 @@ function renderWorkCalendar() {
     const dow   = new Date(y, m, d).getDay();
     const isTdy = now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
     const val   = getWorkDay(y, m, d);
-    const cell  = makeWorkCell(d, y, m, false, dow === 0 || dow === 6, isTdy, val);
-    grid.appendChild(cell);
+    grid.appendChild(makeWorkCell(d, y, m, false, dow === 0 || dow === 6, isTdy, val));
   }
   const total = startOff + daysInMo;
   const rem   = total % 7 === 0 ? 0 : 7 - (total % 7);
@@ -296,6 +328,7 @@ function renderWorkCalendar() {
     grid.appendChild(makeWorkCell(d, y, m, true));
   }
   animateGrid('calendar-grid');
+  setTimeout(() => { state._justToggled = null; }, 500);
 }
 
 function makeWorkCell(d, y, m, isOther, isWeekend, isToday, val) {
@@ -306,6 +339,9 @@ function makeWorkCell(d, y, m, isOther, isWeekend, isToday, val) {
   if (isToday)   classes.push('today');
   if (val === 1)   classes.push('worked');
   if (val === 0.5) classes.push('worked-half');
+  const jt = state._justToggled;
+  if (!isOther && jt && jt.y === y && jt.m === m && jt.d === d && val > 0)
+    classes.push('confirm-anim');
   cell.className = classes.join(' ');
   cell.innerHTML = `
     <span class="day-number">${d}</span>
@@ -333,9 +369,12 @@ function toggleCleanDay(y, m, d) {
   const idx  = days.indexOf(d);
   if (idx === -1) {
     days.push(d);
+    state._justToggled = { y, m, d, type: 'clean' };
+    vibrate([15, 8, 15]);
     showToast('🚗 Nettoyage ajouté');
   } else {
     days.splice(idx, 1);
+    state._justToggled = null;
     showToast('Nettoyage retiré');
   }
   state.clean[key] = days;
@@ -369,8 +408,7 @@ function renderCleanCalendar() {
   for (let d = 1; d <= daysInMo; d++) {
     const dow   = new Date(y, m, d).getDay();
     const isTdy = now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
-    const cell  = makeCleanCell(d, y, m, false, dow === 0 || dow === 6, isTdy, isCleanDay(y, m, d));
-    grid.appendChild(cell);
+    grid.appendChild(makeCleanCell(d, y, m, false, dow === 0 || dow === 6, isTdy, isCleanDay(y, m, d)));
   }
   const total = startOff + daysInMo;
   const rem   = total % 7 === 0 ? 0 : 7 - (total % 7);
@@ -378,6 +416,7 @@ function renderCleanCalendar() {
     grid.appendChild(makeCleanCell(d, y, m, true));
   }
   animateGrid('clean-calendar-grid');
+  setTimeout(() => { state._justToggled = null; }, 500);
 }
 
 function makeCleanCell(d, y, m, isOther, isWeekend, isToday, cleaned) {
@@ -387,6 +426,9 @@ function makeCleanCell(d, y, m, isOther, isWeekend, isToday, cleaned) {
   if (isWeekend && !isOther) classes.push('weekend');
   if (isToday)   classes.push('today');
   if (cleaned)   classes.push('cleaned');
+  const jt = state._justToggled;
+  if (!isOther && cleaned && jt && jt.y === y && jt.m === m && jt.d === d)
+    classes.push('confirm-anim');
   cell.className = classes.join(' ');
   cell.innerHTML = `
     <span class="day-number">${d}</span>
@@ -422,8 +464,7 @@ function renderThemeGrid() {
     btn.className = `theme-swatch${state.theme === t.id ? ' active' : ''}`;
     btn.title = t.name;
     btn.style.background = `linear-gradient(135deg, ${t.colors[0]}, ${t.colors[1]})`;
-    btn.innerHTML = state.theme === t.id
-      ? '<span class="swatch-check">✓</span>' : '';
+    btn.innerHTML = state.theme === t.id ? '<span class="swatch-check">✓</span>' : '';
     btn.addEventListener('click', () => {
       applyTheme(t.id);
       save();
@@ -435,10 +476,216 @@ function renderThemeGrid() {
 }
 
 // ══════════════════════════════════════
+// CHART — 6 derniers mois (SVG natif)
+// ══════════════════════════════════════
+function renderChart() {
+  const container = document.getElementById('earnings-chart');
+  if (!container) return;
+
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    months.push({ year: d.getFullYear(), month: d.getMonth() });
+  }
+
+  const data = months.map(({ year, month }) => {
+    const key = monthKey(year, month);
+    const wDays = Object.values(state.work[key] || {}).reduce((s, v) => s + v, 0);
+    const cDays = (state.clean[key] || []).length;
+    const wEarn = wDays * state.dailyRate;
+    const cEarn = cDays * state.cleanRate;
+    return {
+      label: new Date(year, month).toLocaleDateString('fr-FR', { month: 'short' }),
+      work: wEarn,
+      clean: cEarn,
+      total: wEarn + cEarn,
+    };
+  });
+
+  const allZero = data.every(d => d.total === 0);
+  if (allZero) {
+    container.innerHTML = '<div class="chart-empty">Aucune donnée à afficher</div>';
+    return;
+  }
+
+  const maxVal = Math.max(1, ...data.map(d => d.total));
+  // SVG dimensions
+  const W = 320, CH = 96; // chart height
+  const barW = 34, gap = 12;
+  const startX = (W - (6 * barW + 5 * gap)) / 2;
+  const LABEL_H = 18, VAL_TOP = 14;
+  const SVG_H = VAL_TOP + CH + LABEL_H;
+
+  const bars = data.map((d, i) => {
+    const x    = startX + i * (barW + gap);
+    const totalH = (d.total / maxVal) * CH;
+    const workH  = (d.work  / maxVal) * CH;
+    const cleanH = totalH - workH;
+    const yBase  = VAL_TOP + CH; // bottom of chart
+
+    const valLabel = d.total > 0
+      ? `<text x="${x + barW / 2}" y="${VAL_TOP + CH - totalH - 3}"
+           text-anchor="middle" font-size="8" fill="var(--text-2)" font-family="inherit">
+           ${d.total >= 1000 ? (d.total / 1000).toFixed(1) + 'k' : Math.round(d.total)}
+         </text>`
+      : '';
+
+    return `
+      <g>
+        ${workH > 0 ? `<rect x="${x}" y="${yBase - workH}" width="${barW}" height="${workH}"
+          fill="var(--success)" rx="4" opacity="0.82"/>` : ''}
+        ${cleanH > 0.5 ? `<rect x="${x}" y="${yBase - totalH}" width="${barW}" height="${cleanH}"
+          fill="var(--clean-accent)" rx="4" opacity="0.82"/>` : ''}
+        ${totalH < 1 ? `<rect x="${x}" y="${yBase - 3}" width="${barW}" height="3"
+          fill="var(--text-3)" rx="1.5" opacity="0.3"/>` : ''}
+        ${valLabel}
+        <text x="${x + barW / 2}" y="${SVG_H}"
+          text-anchor="middle" font-size="9.5" fill="var(--text-3)" font-family="inherit"
+          text-transform="capitalize">${d.label}</text>
+      </g>`;
+  }).join('');
+
+  // Legend
+  const legend = `
+    <g transform="translate(${startX}, ${SVG_H - LABEL_H - 2})">
+    </g>`;
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${SVG_H + 2}" width="100%" style="overflow:visible">
+      ${bars}
+    </svg>
+    <div style="display:flex;gap:12px;margin-top:10px;justify-content:center">
+      <span style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--success);opacity:0.82"></span>Travail
+      </span>
+      ${state.cleanRate > 0 ? `<span style="font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:4px">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--clean-accent);opacity:0.82"></span>Clean
+      </span>` : ''}
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// STATS AVANCÉES (Résumé)
+// ══════════════════════════════════════
+function renderAdvancedStats() {
+  const now   = new Date();
+  const y     = now.getFullYear();
+  const m     = now.getMonth();
+  const key   = monthKey(y, m);
+
+  // Moyenne journalière = total mois / nb jours cochés
+  const workDaysObj = state.work[key] || {};
+  const workedCount = Object.keys(workDaysObj).length;
+  const monthTotal  = Object.values(workDaysObj).reduce((s, v) => s + v, 0) * state.dailyRate
+                    + (state.clean[key] || []).length * state.cleanRate;
+  const avg = workedCount > 0 ? monthTotal / workedCount : 0;
+
+  // Projection = (total / jours écoulés) × jours dans le mois
+  const daysElapsed = now.getDate();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const projection  = daysElapsed > 0 ? (monthTotal / daysElapsed) * daysInMonth : 0;
+
+  // Meilleur mois de l'année
+  let bestLabel = '—', bestTotal = 0;
+  for (let mo = 0; mo < 12; mo++) {
+    const k = monthKey(y, mo);
+    const wD = Object.values(state.work[k] || {}).reduce((s, v) => s + v, 0);
+    const cD = (state.clean[k] || []).length;
+    const t  = wD * state.dailyRate + cD * state.cleanRate;
+    if (t > bestTotal) {
+      bestTotal = t;
+      bestLabel = new Date(y, mo).toLocaleDateString('fr-FR', { month: 'short' });
+    }
+  }
+
+  const el = id => document.getElementById(id);
+  el('adv-avg').textContent  = avg > 0       ? fmt(avg)        : '—';
+  el('adv-proj').textContent = projection > 0 ? fmt(projection) : '—';
+  el('adv-best').textContent = bestTotal > 0  ? bestLabel       : '—';
+}
+
+// ══════════════════════════════════════
+// EXPORT PDF (JS natif — window.print)
+// ══════════════════════════════════════
+function exportPDF() {
+  const y = state.workYear;
+  const m = state.workMonth;
+  const key = monthKey(y, m);
+  const label = new Date(y, m, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  const workDays  = state.work[key]  || {};
+  const cleanDays = state.clean[key] || [];
+  const totalWorkUnits = Object.values(workDays).reduce((s, v) => s + v, 0);
+  const workEarn  = totalWorkUnits * state.dailyRate;
+  const cleanEarn = cleanDays.length * state.cleanRate;
+  const total     = workEarn + cleanEarn;
+
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  let rows = '';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const wv  = workDays[String(d)] || 0;
+    const cl  = cleanDays.includes(d);
+    const dow = new Date(y, m, d).toLocaleDateString('fr-FR', { weekday: 'short' });
+    const wLabel  = wv === 1 ? 'Journée' : wv === 0.5 ? 'Demi-journée' : '';
+    const clLabel = cl ? '🚗' : '';
+    const earn    = wv * state.dailyRate + (cl ? state.cleanRate : 0);
+    const isWeekend = [0, 6].includes(new Date(y, m, d).getDay());
+    rows += `<tr style="${isWeekend ? 'color:#888' : ''}">
+      <td>${d} ${dow.charAt(0).toUpperCase() + dow.slice(1)}</td>
+      <td>${wLabel}</td>
+      <td style="text-align:center">${clLabel}</td>
+      <td style="text-align:right">${earn > 0 ? (earn + ' €') : '—'}</td>
+    </tr>`;
+  }
+
+  const html = `<!DOCTYPE html><html lang="fr"><head>
+    <meta charset="UTF-8"/>
+    <title>TrackInkWork · ${label}</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px; color: #111; margin: 0; padding: 32px; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      .sub { color: #666; font-size: 12px; margin-bottom: 24px; }
+      .summary { display: flex; gap: 32px; margin-bottom: 24px; padding: 16px 20px;
+                 background: #f5f3ff; border-radius: 10px; }
+      .stat-val { font-size: 20px; font-weight: 700; }
+      .stat-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+      table { width: 100%; border-collapse: collapse; }
+      th { background: #f0f0f0; padding: 8px 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 11px; text-transform: uppercase; }
+      td { padding: 6px 10px; border-bottom: 1px solid #eee; }
+      tr:last-child td { border-bottom: none; }
+      .total-row { font-weight: 700; font-size: 15px; margin-top: 20px; text-align: right; }
+      @media print { body { padding: 20px; } }
+    </style>
+  </head><body>
+    <h1>TrackInkWork</h1>
+    <div class="sub">Rapport mensuel · ${label.charAt(0).toUpperCase() + label.slice(1)}</div>
+    <div class="summary">
+      <div><div class="stat-val">${totalWorkUnits % 1 === 0 ? totalWorkUnits : totalWorkUnits.toFixed(1)}</div><div class="stat-lbl">Jours travaillés</div></div>
+      <div><div class="stat-val">${cleanDays.length}</div><div class="stat-lbl">Nettoyages</div></div>
+      <div><div class="stat-val">${workEarn} €</div><div class="stat-lbl">Travail</div></div>
+      ${state.cleanRate > 0 ? `<div><div class="stat-val">${cleanEarn} €</div><div class="stat-lbl">Clean</div></div>` : ''}
+      <div><div class="stat-val" style="color:#6d28d9">${total} €</div><div class="stat-lbl">Total</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Jour</th><th>Travail</th><th style="text-align:center">Clean</th><th style="text-align:right">Gains</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="total-row">Total mensuel : <span style="color:#6d28d9">${total} €</span></div>
+  </body></html>`;
+
+  const w = window.open('', '_blank', 'width=780,height=900');
+  if (!w) { showToast('Autorisez les popups pour le PDF'); return; }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 400);
+  showToast(`PDF · ${label}`);
+}
+
+// ══════════════════════════════════════
 // SETTINGS
 // ══════════════════════════════════════
 function bindSettings() {
-  // Rate
   const rateInput = document.getElementById('daily-rate');
   rateInput.addEventListener('change', () => {
     const v = parseInt(rateInput.value, 10);
@@ -452,7 +699,6 @@ function bindSettings() {
     }
   });
 
-  // Clean rate
   const cleanRateInput = document.getElementById('clean-rate');
   cleanRateInput.addEventListener('change', () => {
     const v = parseInt(cleanRateInput.value, 10);
@@ -466,7 +712,6 @@ function bindSettings() {
     }
   });
 
-  // Export
   document.getElementById('export-btn').addEventListener('click', () => {
     const json = JSON.stringify(
       { work: state.work, clean: state.clean, dailyRate: state.dailyRate }, null, 2
@@ -480,7 +725,8 @@ function bindSettings() {
     showToast('Données exportées');
   });
 
-  // Reset
+  document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
+
   document.getElementById('reset-btn').addEventListener('click', showModal);
   document.getElementById('modal-cancel').addEventListener('click', hideModal);
   document.getElementById('modal-confirm').addEventListener('click', () => {
@@ -519,6 +765,20 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════════
+function checkOnboarding() {
+  const hasData = Object.keys(state.work).length > 0 || Object.keys(state.clean).length > 0;
+  if (hasData) return;
+  const el = document.getElementById('onboarding-overlay');
+  if (!el) return;
+  requestAnimationFrame(() => el.classList.add('show'));
+  document.getElementById('onboarding-close').addEventListener('click', () => {
+    el.classList.remove('show');
+  }, { once: true });
 }
 
 // ══════════════════════════════════════
@@ -600,27 +860,23 @@ function renderResume() {
 
   document.getElementById('resume-year').textContent = year;
 
-  // Collect all month keys that have any data
   const allKeys = new Set([
     ...Object.keys(state.work),
     ...Object.keys(state.clean),
   ]);
-  // Always show all 12 months of current year
   for (let m = 0; m < 12; m++) allKeys.add(monthKey(year, m));
 
   const sorted = [...allKeys]
     .filter(k => k.startsWith(String(year)))
     .sort((a, b) => b.localeCompare(a));
 
-  // Annual totals
   let totalWorkDays = 0, totalClean = 0, totalWorkEarn = 0, totalCleanEarn = 0;
   sorted.forEach(k => {
-    const [yr, mo] = k.split('-').map(Number);
     const wDays = Object.values(state.work[k] || {}).reduce((s, v) => s + v, 0);
     const cDays = (state.clean[k] || []).length;
-    totalWorkDays += wDays;
-    totalClean    += cDays;
-    totalWorkEarn += wDays * state.dailyRate;
+    totalWorkDays  += wDays;
+    totalClean     += cDays;
+    totalWorkEarn  += wDays * state.dailyRate;
     totalCleanEarn += cDays * state.cleanRate;
   });
 
@@ -631,12 +887,13 @@ function renderResume() {
   document.getElementById('resume-work-earn').textContent   = fmt(totalWorkEarn);
   document.getElementById('resume-clean-earn').textContent  = fmt(totalCleanEarn);
 
-  // Monthly list
+  renderAdvancedStats();
+  renderChart();
+
   const list = document.getElementById('resume-months');
   list.innerHTML = '';
 
   const maxTotal = Math.max(1, ...sorted.map(k => {
-    const [,mo] = k.split('-').map(Number);
     const wE = Object.values(state.work[k] || {}).reduce((s,v) => s+v, 0) * state.dailyRate;
     const cE = (state.clean[k] || []).length * state.cleanRate;
     return wE + cE;
@@ -700,4 +957,5 @@ document.addEventListener('DOMContentLoaded', () => {
   bindCalendarNav();
   bindSettings();
   renderWorkCalendar();
+  checkOnboarding();
 });

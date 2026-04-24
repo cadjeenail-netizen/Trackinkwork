@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#6d28d9" />
   <title>TrackInkWork</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -110,6 +113,32 @@
           </div>
         </div>
 
+        <!-- Stats avancées -->
+        <div class="glass-card adv-stats-card">
+          <div class="adv-stats-row">
+            <div class="adv-stat">
+              <span class="adv-stat-val accent-color" id="adv-avg">—</span>
+              <span class="adv-stat-label">Moy. / jour</span>
+            </div>
+            <div class="adv-stat-divider"></div>
+            <div class="adv-stat">
+              <span class="adv-stat-val success-color" id="adv-proj">—</span>
+              <span class="adv-stat-label">Projection mois</span>
+            </div>
+            <div class="adv-stat-divider"></div>
+            <div class="adv-stat">
+              <span class="adv-stat-val clean-color" id="adv-best">—</span>
+              <span class="adv-stat-label">Meilleur mois</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graphique 6 derniers mois -->
+        <div class="glass-card chart-card">
+          <div class="chart-header">Gains · 6 derniers mois</div>
+          <div id="earnings-chart"></div>
+        </div>
+
         <div class="resume-month-list" id="resume-months"></div>
       </section>
 
@@ -167,7 +196,15 @@
               <div class="settings-row clickable" id="export-btn">
                 <div class="settings-row-left">
                   <div class="settings-icon-wrap">📤</div>
-                  <span class="settings-row-title">Exporter les données</span>
+                  <span class="settings-row-title">Exporter les données (JSON)</span>
+                </div>
+                <span class="settings-chevron">›</span>
+              </div>
+              <div class="settings-separator"></div>
+              <div class="settings-row clickable" id="export-pdf-btn">
+                <div class="settings-row-left">
+                  <div class="settings-icon-wrap">📋</div>
+                  <span class="settings-row-title">Exporter PDF mensuel</span>
                 </div>
                 <span class="settings-chevron">›</span>
               </div>
@@ -191,7 +228,7 @@
             <div class="glass-card about-card">
               <div class="about-logo">🖋️</div>
               <div class="about-name">TrackInkWork</div>
-              <div class="about-ver">v2.1.0 · GitHub Pages</div>
+              <div class="about-ver">v2.2.0 · GitHub Pages</div>
             </div>
           </div>
 
@@ -242,6 +279,16 @@
       </div>
     </nav>
 
+    <!-- Onboarding -->
+    <div class="onboarding-overlay" id="onboarding-overlay">
+      <div class="onboarding-sheet glass-card">
+        <div class="onboarding-icon">🖋️</div>
+        <h2 class="onboarding-title">Bienvenue sur TrackInkWork</h2>
+        <p class="onboarding-body">Suivez vos journées de travail et vos nettoyages de voiture. Appuyez sur un jour pour le marquer !</p>
+        <button class="onboarding-btn" id="onboarding-close">Commencer</button>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <div class="modal-overlay" id="modal-overlay">
@@ -258,5 +305,12 @@
 
   </div>
   <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Trackinkwork/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

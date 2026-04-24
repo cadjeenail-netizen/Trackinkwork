@@ -250,7 +250,7 @@ body {
   border: 1px solid rgba(255,255,255,0.18);
   border-top-color: rgba(255,255,255,0.28);
   color: var(--text-1);
-  width: 36px; height: 36px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   font-size: 22px;
   font-weight: 300;
@@ -958,4 +958,154 @@ body {
     width: 420px;
     height: min(900px, calc(100dvh - 48px));
   }
+}
+
+/* ════════════════════════════════════════
+   CONFIRMATION ANIMATION
+   ════════════════════════════════════════ */
+@keyframes confirmPop {
+  0%   { transform: scale(0.85); }
+  45%  { transform: scale(1.22); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.day-cell.confirm-anim {
+  animation: confirmPop 0.42s var(--spring) both;
+}
+
+/* ════════════════════════════════════════
+   STATS AVANCÉES (Résumé)
+   ════════════════════════════════════════ */
+.adv-stats-card {
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+.adv-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.adv-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.adv-stat-val {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.adv-stat-label {
+  font-size: 10px;
+  color: var(--text-3);
+  font-weight: 500;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.adv-stat-divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════
+   GRAPHIQUE (Résumé)
+   ════════════════════════════════════════ */
+.chart-card {
+  padding: 16px 18px 20px;
+  margin-bottom: 12px;
+}
+.chart-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 14px;
+}
+#earnings-chart svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.chart-empty {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ════════════════════════════════════════
+   ONBOARDING
+   ════════════════════════════════════════ */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-ios);
+}
+.onboarding-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.onboarding-sheet {
+  width: 100%;
+  padding: 32px 24px 28px;
+  text-align: center;
+  border-radius: var(--r-xl);
+  transform: translateY(30px);
+  transition: transform 0.4s var(--spring);
+}
+.onboarding-overlay.show .onboarding-sheet {
+  transform: translateY(0);
+}
+.onboarding-icon  { font-size: 52px; margin-bottom: 14px; }
+.onboarding-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.onboarding-body  { font-size: 15px; color: var(--text-2); line-height: 1.6; margin-bottom: 28px; }
+.onboarding-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--r-md);
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.35s var(--spring), opacity 0.15s ease;
+}
+.onboarding-btn:active { transform: scale(0.96); opacity: 0.88; }
+
+/* ════════════════════════════════════════
+   PRINT / EXPORT PDF
+   ════════════════════════════════════════ */
+@media print {
+  body { background: #fff; color: #000; font-family: Arial, sans-serif; }
+  .pdf-report { max-width: 700px; margin: 0 auto; padding: 30px; }
+  .pdf-title   { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .pdf-sub     { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .pdf-summary { display: flex; gap: 24px; margin-bottom: 24px; }
+  .pdf-stat    { text-align: center; }
+  .pdf-stat-val { font-size: 22px; font-weight: 700; }
+  .pdf-stat-label { font-size: 11px; color: #888; text-transform: uppercase; }
+  .pdf-table   { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pdf-table th { background: #f0f0f0; padding: 8px 10px; text-align: left; border: 1px solid #ddd; }
+  .pdf-table td { padding: 6px 10px; border: 1px solid #eee; }
+  .pdf-table tr:nth-child(even) td { background: #fafafa; }
+  .pdf-total   { margin-top: 20px; font-size: 16px; font-weight: 700; text-align: right; }
 }
