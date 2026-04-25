@@ -912,27 +912,7 @@ const TAB_COLORS = {
   settings: { bg: 'rgba(251,146,60,0.18)',  glow: 'rgba(251,146,60,0.45)'  },
 };
 
-function updateTabIndicator(tabId) {
-  const indicator = document.getElementById('tab-indicator');
-  const btn       = document.querySelector(`[data-tab="${tabId}"]`);
-  const bar       = document.querySelector('.tab-bar-inner');
-  if (!indicator || !btn || !bar) return;
-
-  const bRect = btn.getBoundingClientRect();
-  const cRect = bar.getBoundingClientRect();
-  const p = 2;
-
-  indicator.style.left   = (bRect.left - cRect.left + p) + 'px';
-  indicator.style.top    = p + 'px';
-  indicator.style.width  = (bRect.width  - p * 2) + 'px';
-  indicator.style.height = (bRect.height - p * 2) + 'px';
-
-  const c = TAB_COLORS[tabId] || TAB_COLORS.workday;
-  indicator.style.setProperty('--ind-color', c.bg);
-  indicator.style.setProperty('--ind-glow',  c.glow);
-  indicator.style.background = `linear-gradient(145deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 100%)`;
-  indicator.style.boxShadow  = `0 1.5px 0 rgba(255,255,255,0.55) inset, 0 4px 24px ${c.glow}, 0 2px 10px rgba(0,0,0,0.25)`;
-}
+function updateTabIndicator() {}
 
 function switchTab(id) {
   document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));

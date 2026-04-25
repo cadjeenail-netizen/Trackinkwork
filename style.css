@@ -808,32 +808,11 @@ body {
   transition-duration: 0.08s;
 }
 
-/* Sliding indicator pill */
-.tab-indicator {
-  position: absolute;
-  border-radius: var(--r-md);
-  background: linear-gradient(145deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 100%);
-  border: 1px solid rgba(255,255,255,0.45);
-  border-top-color: rgba(255,255,255,0.65);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.22) inset,
-    0 4px 20px var(--ind-glow, var(--accent-glow)),
-    0 2px 8px rgba(0,0,0,0.2);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  pointer-events: none;
-  z-index: 0;
-  transition:
-    left 0.4s var(--spring),
-    width 0.4s var(--spring),
-    top 0.4s var(--spring),
-    height 0.4s var(--spring),
-    background 0.35s ease,
-    box-shadow 0.35s ease;
-  will-change: left, width;
-}
 .tab-btn.active {
   color: var(--accent);
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-top-color: rgba(255,255,255,0.35);
 }
 .tab-btn::before { display: none; }
 
