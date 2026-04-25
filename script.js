@@ -208,6 +208,7 @@ const state = {
   clean: {},
   dailyRate: 50,
   cleanRate: 0,
+  pocketMoney: 0,
   monthlyGoal: 0,
   theme: 'violet',
   _justToggled: null,
@@ -220,6 +221,7 @@ function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     work: state.work, clean: state.clean,
     dailyRate: state.dailyRate, cleanRate: state.cleanRate,
+    pocketMoney: state.pocketMoney,
     monthlyGoal: state.monthlyGoal, theme: state.theme,
   }));
 }
@@ -244,6 +246,7 @@ function load() {
     state.clean       = p.clean       || {};
     state.dailyRate   = p.dailyRate   || 50;
     state.cleanRate   = p.cleanRate   ?? 0;
+    state.pocketMoney = p.pocketMoney ?? 0;
     state.monthlyGoal = p.monthlyGoal ?? 0;
     state.theme       = p.theme       || 'violet';
   } catch (_) { /* start fresh */ }
@@ -494,7 +497,7 @@ function renderGoal() {
   const key = monthKey(now.getFullYear(), now.getMonth());
   const wDays = Object.values(state.work[key] || {}).reduce((s, v) => s + v, 0);
   const cDays = (state.clean[key] || []).length;
-  const current = wDays * state.dailyRate + cDays * state.cleanRate;
+  const current = wDays * state.dailyRate + cDays * state.cleanRate + state.pocketMoney;
   const goal    = state.monthlyGoal;
 
   const CIRC = 2 * Math.PI * 48; // 301.59
@@ -771,6 +774,22 @@ function bindSettings() {
 
   document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
 
+  // Argent de poche
+  const pocketInput = document.getElementById('pocket-money');
+  if (pocketInput) {
+    pocketInput.addEventListener('change', () => {
+      const v = parseInt(pocketInput.value, 10);
+      if (!isNaN(v) && v >= 0) {
+        state.pocketMoney = v;
+        save();
+        renderGoal();
+        showToast(`💰 Argent de poche : ${fmt(v)}`);
+      } else {
+        pocketInput.value = state.pocketMoney;
+      }
+    });
+  }
+
   // Objectif mensuel
   const goalInput = document.getElementById('goal-input');
   if (goalInput) {
@@ -813,6 +832,8 @@ function bindSettings() {
 function renderSettings() {
   document.getElementById('daily-rate').value  = state.dailyRate;
   document.getElementById('clean-rate').value  = state.cleanRate;
+  const pi = document.getElementById('pocket-money');
+  if (pi) pi.value = state.pocketMoney;
   const gi = document.getElementById('goal-input');
   if (gi) gi.value = state.monthlyGoal;
   renderThemeGrid();
