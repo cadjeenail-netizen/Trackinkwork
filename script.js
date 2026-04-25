@@ -916,7 +916,7 @@ function updateTabIndicator(tabId) {
   const indicator = document.getElementById('tab-indicator');
   const btn = document.querySelector(`[data-tab="${tabId}"]`);
   if (!indicator || !btn) return;
-  const p = 3;
+  const p = 5;
   indicator.style.left   = (btn.offsetLeft + p) + 'px';
   indicator.style.top    = p + 'px';
   indicator.style.width  = (btn.offsetWidth - p * 2) + 'px';
