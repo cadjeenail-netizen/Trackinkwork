@@ -920,7 +920,7 @@ function updateTabIndicator(tabId) {
 
   const bRect = btn.getBoundingClientRect();
   const cRect = bar.getBoundingClientRect();
-  const p = 5;
+  const p = 2;
 
   indicator.style.left   = (bRect.left - cRect.left + p) + 'px';
   indicator.style.top    = p + 'px';
@@ -930,8 +930,8 @@ function updateTabIndicator(tabId) {
   const c = TAB_COLORS[tabId] || TAB_COLORS.workday;
   indicator.style.setProperty('--ind-color', c.bg);
   indicator.style.setProperty('--ind-glow',  c.glow);
-  indicator.style.background = `linear-gradient(135deg,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0.07) 100%),${c.bg}`;
-  indicator.style.boxShadow  = `0 1px 0 rgba(255,255,255,0.22) inset,0 4px 20px ${c.glow},0 2px 8px rgba(0,0,0,0.2)`;
+  indicator.style.background = `linear-gradient(145deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 100%)`;
+  indicator.style.boxShadow  = `0 1.5px 0 rgba(255,255,255,0.55) inset, 0 4px 24px ${c.glow}, 0 2px 10px rgba(0,0,0,0.25)`;
 }
 
 function switchTab(id) {
