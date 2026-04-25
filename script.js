@@ -456,6 +456,8 @@ function applyTheme(id) {
   state.theme = theme.id;
   const root = document.documentElement;
   Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.content = theme.colors[0];
 }
 
 function renderThemeGrid() {
@@ -493,8 +495,7 @@ function renderGoal() {
   const barFill = document.getElementById('goal-bar-fill');
   if (!card || !circle) return;
 
-  const now = new Date();
-  const key = monthKey(now.getFullYear(), now.getMonth());
+  const key = monthKey(today.getFullYear(), today.getMonth());
   const wDays = Object.values(state.work[key] || {}).reduce((s, v) => s + v, 0);
   const cDays = (state.clean[key] || []).length;
   const current = wDays * state.dailyRate + cDays * state.cleanRate + state.pocketMoney;
@@ -592,11 +593,6 @@ function renderChart() {
       </g>`;
   }).join('');
 
-  // Legend
-  const legend = `
-    <g transform="translate(${startX}, ${SVG_H - LABEL_H - 2})">
-    </g>`;
-
   container.innerHTML = `
     <svg viewBox="0 0 ${W} ${SVG_H + 2}" width="100%" style="overflow:visible">
       ${bars}
@@ -624,7 +620,8 @@ function renderAdvancedStats() {
   const workDaysObj = state.work[key] || {};
   const workedCount = Object.keys(workDaysObj).length;
   const monthTotal  = Object.values(workDaysObj).reduce((s, v) => s + v, 0) * state.dailyRate
-                    + (state.clean[key] || []).length * state.cleanRate;
+                    + (state.clean[key] || []).length * state.cleanRate
+                    + state.pocketMoney;
   const avg = workedCount > 0 ? monthTotal / workedCount : 0;
 
   // Projection = (total / jours écoulés) × jours dans le mois
@@ -720,12 +717,11 @@ function exportPDF() {
     <div class="total-row">Total mensuel : <span style="color:#6d28d9">${total} €</span></div>
   </body></html>`;
 
-  const w = window.open('', '_blank', 'width=780,height=900');
-  if (!w) { showToast('Autorisez les popups pour le PDF'); return; }
-  w.document.write(html);
-  w.document.close();
-  w.focus();
-  setTimeout(() => { w.print(); }, 400);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank', 'width=780,height=900');
+  if (!w) { URL.revokeObjectURL(url); showToast('Autorisez les popups pour le PDF'); return; }
+  w.addEventListener('load', () => { w.print(); URL.revokeObjectURL(url); }, { once: true });
   showToast(`PDF · ${label}`);
 }
 
@@ -761,7 +757,11 @@ function bindSettings() {
 
   document.getElementById('export-btn').addEventListener('click', () => {
     const json = JSON.stringify(
-      { work: state.work, clean: state.clean, dailyRate: state.dailyRate }, null, 2
+      {
+        work: state.work, clean: state.clean,
+        dailyRate: state.dailyRate, cleanRate: state.cleanRate,
+        pocketMoney: state.pocketMoney, monthlyGoal: state.monthlyGoal,
+      }, null, 2
     );
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([json], { type: 'application/json' })),

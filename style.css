@@ -82,6 +82,7 @@ body {
   z-index: 0;
   opacity: var(--blob-opacity);
   transition: opacity 0.5s ease;
+  will-change: transform;
 }
 .blob-1 {
   width: 420px; height: 420px;
@@ -727,7 +728,7 @@ body {
    ════════════════════════════════════════ */
 .theme-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
   gap: 12px;
   padding: 4px 18px 18px;
 }
@@ -1097,8 +1098,8 @@ body {
 .goal-pct {
   fill: var(--text-1);
   font-size: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
   font-weight: 700;
-  font-family: Georgia, serif;
   text-anchor: middle;
   transform: rotate(90deg);
   transform-origin: 60px 60px;
@@ -1106,6 +1107,7 @@ body {
 .goal-amount {
   fill: var(--text-3);
   font-size: 9px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
   font-weight: 600;
   text-anchor: middle;
   letter-spacing: 0.3px;

@@ -2,10 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#6d28d9" />
+  <meta name="description" content="TrackInkWork — Suivez vos jours de travail, nettoyages et objectifs financiers mensuels." />
   <title>TrackInkWork</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.svg" />
@@ -35,9 +36,9 @@
 
         <div class="glass-card calendar-card">
           <div class="calendar-nav">
-            <button class="nav-btn" id="prev-month">&#8249;</button>
+            <button class="nav-btn" id="prev-month" aria-label="Mois précédent">&#8249;</button>
             <span class="month-title" id="month-title"></span>
-            <button class="nav-btn" id="next-month">&#8250;</button>
+            <button class="nav-btn" id="next-month" aria-label="Mois suivant">&#8250;</button>
           </div>
           <div class="calendar-weekdays">
             <span>L</span><span>M</span><span>M</span>
@@ -66,9 +67,9 @@
 
         <div class="glass-card calendar-card">
           <div class="calendar-nav">
-            <button class="nav-btn" id="clean-prev-month">&#8249;</button>
+            <button class="nav-btn" id="clean-prev-month" aria-label="Mois précédent">&#8249;</button>
             <span class="month-title" id="clean-month-title"></span>
-            <button class="nav-btn" id="clean-next-month">&#8250;</button>
+            <button class="nav-btn" id="clean-next-month" aria-label="Mois suivant">&#8250;</button>
           </div>
           <div class="calendar-weekdays">
             <span>L</span><span>M</span><span>M</span>
@@ -274,7 +275,7 @@
             <div class="glass-card about-card">
               <div class="about-logo">🖋️</div>
               <div class="about-name">TrackInkWork</div>
-              <div class="about-ver">v2.2.0 · GitHub Pages</div>
+              <div class="about-ver">v2.3.0 · GitHub Pages</div>
             </div>
           </div>
 
