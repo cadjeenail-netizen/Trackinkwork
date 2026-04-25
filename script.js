@@ -914,14 +914,19 @@ const TAB_COLORS = {
 
 function updateTabIndicator(tabId) {
   const indicator = document.getElementById('tab-indicator');
-  const btn = document.querySelector(`[data-tab="${tabId}"]`);
-  if (!indicator || !btn) return;
+  const btn       = document.querySelector(`[data-tab="${tabId}"]`);
+  const bar       = document.querySelector('.tab-bar-inner');
+  if (!indicator || !btn || !bar) return;
+
+  const bRect = btn.getBoundingClientRect();
+  const cRect = bar.getBoundingClientRect();
   const p = 5;
-  indicator.style.left   = (btn.offsetLeft + p) + 'px';
+
+  indicator.style.left   = (bRect.left - cRect.left + p) + 'px';
   indicator.style.top    = p + 'px';
-  indicator.style.width  = (btn.offsetWidth - p * 2) + 'px';
-  indicator.style.height = (btn.offsetHeight - p * 2) + 'px';
-  // Couleur unique par onglet
+  indicator.style.width  = (bRect.width  - p * 2) + 'px';
+  indicator.style.height = (bRect.height - p * 2) + 'px';
+
   const c = TAB_COLORS[tabId] || TAB_COLORS.workday;
   indicator.style.setProperty('--ind-color', c.bg);
   indicator.style.setProperty('--ind-glow',  c.glow);
@@ -1103,6 +1108,15 @@ document.addEventListener('DOMContentLoaded', () => {
   bindSettings();
   renderWorkCalendar();
   checkOnboarding();
-  // Positionne l'indicateur après layout
-  requestAnimationFrame(() => updateTabIndicator('workday'));
+  // Positionne l'indicateur après layout complet
+  requestAnimationFrame(() => requestAnimationFrame(() => updateTabIndicator('workday')));
+
+  // Recalcule si la fenêtre change de taille
+  const bar = document.querySelector('.tab-bar-inner');
+  if (bar && window.ResizeObserver) {
+    new ResizeObserver(() => {
+      const active = document.querySelector('.tab-btn.active');
+      if (active) updateTabIndicator(active.dataset.tab);
+    }).observe(bar);
+  }
 });
