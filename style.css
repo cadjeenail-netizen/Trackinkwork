@@ -201,10 +201,10 @@ body {
    ════════════════════════════════════════ */
 .workday-deco {
   position: absolute;
-  top: 0;
+  top: calc(-1 * max(var(--sat), 12px));
   left: 0;
   right: 0;
-  height: 200px;
+  height: calc(220px + max(var(--sat), 12px));
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
