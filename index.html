@@ -26,6 +26,26 @@
 
       <!-- ── TAB 1 : Jour de travail ── -->
       <section id="tab-workday" class="tab-content active">
+        <div class="workday-deco" aria-hidden="true">
+          <svg class="workday-deco-svg" viewBox="0 0 390 160" preserveAspectRatio="xMidYMid slice">
+            <!-- Grille de points -->
+            <defs>
+              <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.5" fill="rgba(255,255,255,0.18)"/>
+              </pattern>
+              <radialGradient id="deco-fade" cx="50%" cy="0%" r="80%">
+                <stop offset="0%" stop-color="white" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="390" height="160" fill="url(#dots)"/>
+            <rect width="390" height="160" fill="url(#deco-fade)"/>
+            <!-- Arcs décoratifs -->
+            <circle cx="60" cy="-20" r="90" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+            <circle cx="60" cy="-20" r="130" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <circle cx="330" cy="30" r="70" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+          </svg>
+        </div>
         <div class="page-header">
           <h1 class="page-title">Jour de travail</h1>
           <div class="hero-card glass-card">

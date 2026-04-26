@@ -197,10 +197,30 @@ body {
 }
 
 /* ════════════════════════════════════════
+   WORKDAY DECO
+   ════════════════════════════════════════ */
+.workday-deco {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.workday-deco-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ════════════════════════════════════════
    PAGE HEADER & TYPOGRAPHY
    ════════════════════════════════════════ */
 .page-header {
   padding: 16px 2px 14px;
+  position: relative;
+  z-index: 1;
 }
 .page-title {
   font-size: 36px;
